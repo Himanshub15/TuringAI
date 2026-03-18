@@ -87,14 +87,14 @@ export default function Home() {
 
   if (!mounted) {
     return (
-      <div className="flex h-screen items-center justify-center bg-white dark:bg-zinc-950">
-        <div className="w-8 h-8 border-2 border-indigo-600 border-t-transparent rounded-full animate-spin" />
+      <div className="flex h-screen items-center justify-center bg-white dark:bg-zinc-950 transition-colors">
+        <div className="w-8 h-8 border-2 border-orange-500/30 border-t-orange-500 rounded-full animate-spin" />
       </div>
     );
   }
 
   return (
-    <div className="flex h-screen overflow-hidden">
+    <div className="flex h-screen overflow-hidden bg-orange-50/30 dark:bg-zinc-950 transition-colors duration-300">
       <Sidebar
         conversations={conversations}
         activeId={activeId}
@@ -109,7 +109,7 @@ export default function Home() {
         collapsed={sidebarCollapsed}
         onCollapse={toggleCollapse}
       />
-      <main className="flex-1 flex flex-col min-w-0 bg-white dark:bg-zinc-950">
+      <main className="flex-1 flex flex-col min-w-0 bg-white dark:bg-zinc-950 transition-colors duration-300">
         {activeId && (
           <ChatInterface
             key={activeId}
