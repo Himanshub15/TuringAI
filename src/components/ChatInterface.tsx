@@ -5,6 +5,7 @@ import { TextStreamChatTransport, type UIMessage } from "ai";
 import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import MessageList, { getGreeting } from "./MessageList";
 import { PromptInputBox } from "./ui/ai-prompt-box";
+import UsageCircle from "./UsageCircle";
 import { getMessages, saveMessages } from "@/lib/conversations";
 
 interface ChatInterfaceProps {
@@ -39,27 +40,46 @@ export default function ChatInterface({
       setMessages(saved);
     }
     titleSet.current = false;
+    titlePhase.current = 0;
   }, [conversationId, setMessages]);
+
+  const titlePhase = useRef(0); // 0=none, 1=first msg titled, 2=refined
 
   useEffect(() => {
     if (messages.length > 0) {
       saveMessages(conversationId, messages);
     }
 
-    if (!titleSet.current && messages.length >= 1) {
-      const firstUser = messages.find((m) => m.role === "user");
-      if (firstUser) {
-        const text =
-          firstUser.parts
+    const userMessages = messages.filter((m) => m.role === "user");
+    const userCount = userMessages.length;
+
+    // Phase 1: title from first user message
+    if (titlePhase.current === 0 && userCount >= 1) {
+      const text =
+        userMessages[0].parts
+          ?.filter((p) => p.type === "text")
+          .map((p) => p.text)
+          .join("") || "";
+      if (text) {
+        const title = text.slice(0, 50) + (text.length > 50 ? "..." : "");
+        onTitleUpdate(conversationId, title);
+        titlePhase.current = 1;
+      }
+    }
+
+    // Phase 2: refine title after 2nd user message for better context
+    if (titlePhase.current === 1 && userCount >= 2) {
+      const texts = userMessages.slice(0, 2).map(
+        (m) =>
+          m.parts
             ?.filter((p) => p.type === "text")
             .map((p) => p.text)
-            .join("") || "";
-        if (text) {
-          const title = text.slice(0, 50) + (text.length > 50 ? "..." : "");
-          onTitleUpdate(conversationId, title);
-          titleSet.current = true;
-        }
-      }
+            .join("") || ""
+      );
+      const combined = texts.join(" | ");
+      const title = combined.slice(0, 60) + (combined.length > 60 ? "..." : "");
+      onTitleUpdate(conversationId, title);
+      titlePhase.current = 2;
     }
   }, [messages, conversationId, onTitleUpdate]);
 
@@ -129,15 +149,22 @@ export default function ChatInterface({
               {rateLimitMsg}
             </div>
           )}
-          <PromptInputBox
-            onSend={(msg) => handleSend(msg)}
-            isLoading={isActive || isSearching}
-            placeholder={
-              isSearching ? "Searching the web..." : "Message TuringAI..."
-            }
-            searchEnabled={searchEnabled}
-            onSearchToggle={setSearchEnabled}
-          />
+          <div className="flex items-end gap-2">
+            <div className="flex-1">
+              <PromptInputBox
+                onSend={(msg) => handleSend(msg)}
+                isLoading={isActive || isSearching}
+                placeholder={
+                  isSearching ? "Searching the web..." : "Message TuringAI..."
+                }
+                searchEnabled={searchEnabled}
+                onSearchToggle={setSearchEnabled}
+              />
+            </div>
+            <div className="pb-1">
+              <UsageCircle key={messages.length} />
+            </div>
+          </div>
           {isSearching && (
             <p className="text-center text-xs text-orange-500 animate-pulse mt-2">
               Searching the web...

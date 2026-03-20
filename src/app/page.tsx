@@ -104,6 +104,7 @@ export default function Home() {
         }}
         onNew={createNewChat}
         onDelete={handleDelete}
+        onRename={handleTitleUpdate}
         isOpen={sidebarOpen}
         onToggle={() => setSidebarOpen(!sidebarOpen)}
         collapsed={sidebarCollapsed}
