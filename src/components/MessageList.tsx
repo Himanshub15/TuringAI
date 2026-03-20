@@ -62,7 +62,7 @@ export default function MessageList({
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.15 }}
-              className="text-3xl font-bold bg-gradient-to-r from-orange-600 via-amber-500 to-orange-600 dark:from-orange-400 dark:via-amber-300 dark:to-orange-400 bg-clip-text text-transparent mb-2"
+              className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-orange-600 via-amber-500 to-orange-600 dark:from-orange-400 dark:via-amber-300 dark:to-orange-400 bg-clip-text text-transparent mb-2"
             >
               TuringAI
             </motion.h2>
@@ -81,7 +81,7 @@ export default function MessageList({
               initial={{ opacity: 0, y: 15 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.35 }}
-              className="flex items-start gap-3 max-w-md mb-10"
+              className="flex items-start gap-3 max-w-sm sm:max-w-md mb-10"
             >
               <div className="flex-shrink-0">
                 <TuringLogo size="sm" />
@@ -98,7 +98,7 @@ export default function MessageList({
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.5 }}
-              className="grid grid-cols-2 gap-3 w-full max-w-md"
+              className="grid grid-cols-2 gap-2 sm:gap-3 w-full max-w-sm sm:max-w-md"
             >
               {SUGGESTIONS.map((s, i) => (
                 <motion.button
@@ -106,7 +106,7 @@ export default function MessageList({
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.4, delay: 0.55 + i * 0.08 }}
-                  className="flex items-center gap-2.5 px-4 py-3 rounded-xl bg-orange-50/60 dark:bg-white/[0.03] border border-orange-200/50 dark:border-orange-500/10 hover:bg-orange-100/60 dark:hover:bg-orange-500/[0.06] hover:border-orange-300/60 dark:hover:border-orange-500/20 transition-all text-left group"
+                  className="flex items-center gap-2 sm:gap-2.5 px-3 sm:px-4 py-2.5 sm:py-3 rounded-xl bg-orange-50/60 dark:bg-white/[0.03] border border-orange-200/50 dark:border-orange-500/10 hover:bg-orange-100/60 dark:hover:bg-orange-500/[0.06] hover:border-orange-300/60 dark:hover:border-orange-500/20 transition-all text-left group"
                 >
                   <s.icon className={`w-4 h-4 ${s.color} flex-shrink-0 group-hover:scale-110 transition-transform`} />
                   <span className="text-sm text-zinc-600 dark:text-zinc-400 group-hover:text-zinc-800 dark:group-hover:text-zinc-200 transition-colors">
