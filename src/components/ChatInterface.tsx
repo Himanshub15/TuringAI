@@ -43,7 +43,7 @@ export default function ChatInterface({
     titlePhase.current = 0;
   }, [conversationId, setMessages]);
 
-  const titlePhase = useRef(0); // 0=none, 1=first msg titled, 2=refined
+  const titlePhase = useRef(0); // 0=none, 1=quick title, 2=ai title
 
   useEffect(() => {
     if (messages.length > 0) {
@@ -53,7 +53,7 @@ export default function ChatInterface({
     const userMessages = messages.filter((m) => m.role === "user");
     const userCount = userMessages.length;
 
-    // Phase 1: title from first user message
+    // Phase 1: quick title from first user message (instant)
     if (titlePhase.current === 0 && userCount >= 1) {
       const text =
         userMessages[0].parts
@@ -67,19 +67,22 @@ export default function ChatInterface({
       }
     }
 
-    // Phase 2: refine title after 2nd user message for better context
-    if (titlePhase.current === 1 && userCount >= 2) {
-      const texts = userMessages.slice(0, 2).map(
-        (m) =>
-          m.parts
-            ?.filter((p) => p.type === "text")
-            .map((p) => p.text)
-            .join("") || ""
-      );
-      const combined = texts.join(" | ");
-      const title = combined.slice(0, 60) + (combined.length > 60 ? "..." : "");
-      onTitleUpdate(conversationId, title);
-      titlePhase.current = 2;
+    // Phase 2: AI-generated title after we have both user + assistant messages
+    const hasAssistantReply = messages.some((m) => m.role === "assistant");
+    if (titlePhase.current === 1 && userCount >= 1 && hasAssistantReply) {
+      titlePhase.current = 2; // prevent re-trigger
+      fetch("/api/title", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ messages }),
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.title) {
+            onTitleUpdate(conversationId, data.title);
+          }
+        })
+        .catch(() => {}); // keep the quick title on failure
     }
   }, [messages, conversationId, onTitleUpdate]);
 
