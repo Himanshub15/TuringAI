@@ -18,6 +18,7 @@ export default function ChatInterface({
 }: ChatInterfaceProps) {
   const [searchEnabled, setSearchEnabled] = useState(false);
   const [isSearching, setIsSearching] = useState(false);
+  const [rateLimitMsg, setRateLimitMsg] = useState<string | null>(null);
   const titleSet = useRef(false);
 
   const greeting = useMemo(() => getGreeting(), []);
@@ -27,7 +28,7 @@ export default function ChatInterface({
     []
   );
 
-  const { messages, setMessages, sendMessage, status } = useChat({
+  const { messages, setMessages, sendMessage, status, error } = useChat({
     id: conversationId,
     transport,
   });
@@ -62,10 +63,24 @@ export default function ChatInterface({
     }
   }, [messages, conversationId, onTitleUpdate]);
 
+  // Detect rate limit errors
+  useEffect(() => {
+    if (error) {
+      const msg = error.message || "";
+      if (msg.includes("429") || msg.toLowerCase().includes("rate limit")) {
+        setRateLimitMsg(
+          "You've reached the message limit. Please try again in a bit."
+        );
+        setTimeout(() => setRateLimitMsg(null), 10000);
+      }
+    }
+  }, [error]);
+
   const handleSend = useCallback(
     async (message: string) => {
       if (!message.trim() || status !== "ready") return;
 
+      setRateLimitMsg(null);
       const userMessage = message.trim();
       let searchContext: string | undefined;
 
@@ -99,7 +114,6 @@ export default function ChatInterface({
 
   return (
     <div className="flex-1 flex flex-col h-full relative">
-      {/* Subtle aurora background */}
       <div className="absolute inset-0 aurora-bg pointer-events-none" />
 
       <MessageList
@@ -110,6 +124,11 @@ export default function ChatInterface({
 
       <div className="relative px-4 pb-6 pt-2 bg-gradient-to-t from-white via-white/95 dark:from-zinc-950 dark:via-zinc-950/95 to-transparent transition-colors">
         <div className="max-w-3xl mx-auto">
+          {rateLimitMsg && (
+            <div className="mb-3 px-4 py-2.5 rounded-xl bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 text-red-600 dark:text-red-400 text-sm text-center">
+              {rateLimitMsg}
+            </div>
+          )}
           <PromptInputBox
             onSend={(msg) => handleSend(msg)}
             isLoading={isActive || isSearching}
@@ -120,7 +139,7 @@ export default function ChatInterface({
             onSearchToggle={setSearchEnabled}
           />
           {isSearching && (
-            <p className="text-center text-xs text-cyan-500 animate-pulse mt-2">
+            <p className="text-center text-xs text-orange-500 animate-pulse mt-2">
               Searching the web...
             </p>
           )}

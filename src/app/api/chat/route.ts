@@ -1,9 +1,39 @@
 import { streamText, convertToModelMessages, type UIMessage } from "ai";
 import { nim } from "@/lib/nim";
+import { checkRateLimit, getClientIP, isAdmin } from "@/lib/rate-limit";
 
 export const maxDuration = 60;
 
+// Rate limit: 20 messages per hour for regular users
+const RATE_LIMIT = { maxRequests: 20, windowMs: 60 * 60 * 1000 };
+
 export async function POST(req: Request) {
+  // Admin bypass
+  if (!isAdmin(req)) {
+    const ip = getClientIP(req);
+    const result = checkRateLimit(`chat:${ip}`, RATE_LIMIT);
+
+    if (!result.allowed) {
+      const retryAfter = Math.ceil((result.resetAt - Date.now()) / 1000);
+      return new Response(
+        JSON.stringify({
+          error: "Rate limit exceeded. Please try again later.",
+          retryAfter,
+          remaining: 0,
+        }),
+        {
+          status: 429,
+          headers: {
+            "Content-Type": "application/json",
+            "Retry-After": String(retryAfter),
+            "X-RateLimit-Remaining": "0",
+            "X-RateLimit-Reset": String(result.resetAt),
+          },
+        }
+      );
+    }
+  }
+
   const {
     messages,
     searchResults,
