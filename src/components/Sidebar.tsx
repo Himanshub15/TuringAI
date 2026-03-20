@@ -15,9 +15,6 @@ import {
   Settings,
   Type,
   Check,
-  Shield,
-  ShieldCheck,
-  LogOut,
   Pencil,
 } from "lucide-react";
 
@@ -255,16 +252,10 @@ function SidebarContent({
 function SettingsButton() {
   const [open, setOpen] = useState(false);
   const [currentFont, setCurrentFont] = useState("inter");
-  const [isAdmin, setIsAdmin] = useState(false);
-  const [adminInput, setAdminInput] = useState("");
-  const [adminError, setAdminError] = useState("");
-  const [showAdminInput, setShowAdminInput] = useState(false);
 
   useEffect(() => {
     const saved = localStorage.getItem("ai-wrapper-font");
     if (saved) setCurrentFont(saved);
-    // Check if admin cookie exists
-    setIsAdmin(document.cookie.includes("turing-admin="));
   }, []);
 
   const changeFont = (fontId: string) => {
@@ -334,91 +325,6 @@ function SettingsButton() {
                   </button>
                 ))}
               </div>
-            </div>
-
-            <div className="border-t border-zinc-200 dark:border-zinc-700" />
-
-            {/* Admin section */}
-            <div>
-              {isAdmin ? (
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <ShieldCheck className="w-4 h-4 text-green-500" />
-                    <span className="text-sm text-green-600 dark:text-green-400 font-medium">Admin</span>
-                  </div>
-                  <button
-                    onClick={async () => {
-                      await fetch("/api/admin", { method: "DELETE" });
-                      setIsAdmin(false);
-                    }}
-                    className="flex items-center gap-1 text-xs text-zinc-400 hover:text-red-500 transition-colors"
-                  >
-                    <LogOut className="w-3.5 h-3.5" />
-                    Logout
-                  </button>
-                </div>
-              ) : showAdminInput ? (
-                <div className="space-y-2">
-                  <div className="flex items-center gap-2">
-                    <Shield className="w-4 h-4 text-zinc-500 dark:text-zinc-400" />
-                    <span className="text-sm font-medium text-zinc-700 dark:text-gray-200">Admin Login</span>
-                  </div>
-                  <form
-                    onSubmit={async (e) => {
-                      e.preventDefault();
-                      setAdminError("");
-                      try {
-                        const res = await fetch("/api/admin", {
-                          method: "POST",
-                          headers: { "Content-Type": "application/json" },
-                          body: JSON.stringify({ secret: adminInput }),
-                        });
-                        if (res.ok) {
-                          setIsAdmin(true);
-                          setAdminInput("");
-                          setShowAdminInput(false);
-                        } else {
-                          setAdminError("Invalid secret");
-                        }
-                      } catch {
-                        setAdminError("Failed to connect");
-                      }
-                    }}
-                    className="flex gap-2"
-                  >
-                    <input
-                      type="password"
-                      value={adminInput}
-                      onChange={(e) => setAdminInput(e.target.value)}
-                      placeholder="Secret key"
-                      className="flex-1 px-3 py-1.5 text-xs rounded-lg bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-800 dark:text-zinc-200 focus:outline-none focus:border-orange-400"
-                    />
-                    <button
-                      type="submit"
-                      className="px-3 py-1.5 text-xs rounded-lg bg-orange-500 text-white hover:bg-orange-400 transition-colors"
-                    >
-                      Login
-                    </button>
-                  </form>
-                  {adminError && (
-                    <p className="text-xs text-red-500">{adminError}</p>
-                  )}
-                  <button
-                    onClick={() => { setShowAdminInput(false); setAdminError(""); }}
-                    className="text-xs text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors"
-                  >
-                    Cancel
-                  </button>
-                </div>
-              ) : (
-                <button
-                  onClick={() => setShowAdminInput(true)}
-                  className="flex items-center gap-2 text-xs text-zinc-400 dark:text-zinc-500 hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors"
-                >
-                  <Shield className="w-3.5 h-3.5" />
-                  Admin Login
-                </button>
-              )}
             </div>
 
             <div className="border-t border-zinc-200 dark:border-zinc-700" />
