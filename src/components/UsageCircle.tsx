@@ -95,7 +95,7 @@ export default function UsageCircle() {
                 />
               </div>
               <p className="text-zinc-400 dark:text-zinc-500">
-                {usage.max - usage.used} remaining this hour
+                {usage.max - usage.used} remaining today
               </p>
             </div>
           )}
