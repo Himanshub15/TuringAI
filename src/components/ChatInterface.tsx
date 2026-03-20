@@ -67,9 +67,10 @@ export default function ChatInterface({
       }
     }
 
-    // Phase 2: AI-generated title after we have both user + assistant messages
-    const hasAssistantReply = messages.some((m) => m.role === "assistant");
-    if (titlePhase.current === 1 && userCount >= 1 && hasAssistantReply) {
+    // Phase 2: AI-generated title after streaming completes with full reply
+    const assistantMessages = messages.filter((m) => m.role === "assistant");
+    const hasFullReply = assistantMessages.length >= 1 && status === "ready";
+    if (titlePhase.current === 1 && userCount >= 1 && hasFullReply) {
       titlePhase.current = 2; // prevent re-trigger
       fetch("/api/title", {
         method: "POST",
@@ -84,7 +85,7 @@ export default function ChatInterface({
         })
         .catch(() => {}); // keep the quick title on failure
     }
-  }, [messages, conversationId, onTitleUpdate]);
+  }, [messages, conversationId, onTitleUpdate, status]);
 
   // Detect rate limit errors
   useEffect(() => {

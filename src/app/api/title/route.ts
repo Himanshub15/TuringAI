@@ -24,7 +24,7 @@ export async function POST(req: Request) {
   try {
     const { text } = await generateText({
       model: nim.chatModel("moonshotai/kimi-k2.5"),
-      prompt: `Based on this conversation, generate a short title (3-6 words max). Just return the title, nothing else. No quotes, no punctuation at the end.\n\n${context}`,
+      prompt: `You are a title generator. Read this conversation and create a SHORT descriptive topic title (2-5 words). The title should summarize what the conversation is ABOUT, not repeat the question. Examples: "Python List Sorting", "Indian Time Zone", "React State Management", "Pi Mathematical Constant".\n\nConversation:\n${context}\n\nTitle:`,
       maxOutputTokens: 30,
       temperature: 0.3,
     });

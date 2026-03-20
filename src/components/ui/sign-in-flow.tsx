@@ -596,7 +596,7 @@ export const SignInPage = ({ className }: SignInPageProps) => {
 
         <div className="flex flex-1 flex-col lg:flex-row">
           <div className="flex-1 flex flex-col justify-center items-center">
-            <div className="w-full mt-[150px] max-w-sm px-4">
+            <div className="w-full mt-24 sm:mt-[150px] max-w-sm px-4">
               <AnimatePresence mode="wait">
                 {step === "form" ? (
                   <motion.div
@@ -608,10 +608,10 @@ export const SignInPage = ({ className }: SignInPageProps) => {
                     className="space-y-6 text-center"
                   >
                     <div className="space-y-1">
-                      <h1 className="text-[2.5rem] font-bold leading-[1.1] tracking-tight text-white">
+                      <h1 className="text-3xl sm:text-[2.5rem] font-bold leading-[1.1] tracking-tight text-white">
                         Welcome back
                       </h1>
-                      <p className="text-[1.5rem] text-white/70 font-light">
+                      <p className="text-xl sm:text-[1.5rem] text-white/70 font-light">
                         Sign in to TuringAI
                       </p>
                     </div>
@@ -692,7 +692,7 @@ export const SignInPage = ({ className }: SignInPageProps) => {
                     className="space-y-6 text-center"
                   >
                     <div className="space-y-1">
-                      <h1 className="text-[2.5rem] font-bold leading-[1.1] tracking-tight text-white">
+                      <h1 className="text-3xl sm:text-[2.5rem] font-bold leading-[1.1] tracking-tight text-white">
                         You&apos;re in!
                       </h1>
                       <p className="text-[1.25rem] text-white/50 font-light">
