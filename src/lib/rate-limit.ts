@@ -69,6 +69,25 @@ export function checkRateLimit(
   };
 }
 
+export function peekRateLimit(
+  key: string,
+  config: RateLimitConfig
+): { used: number; max: number; resetAt: number } {
+  cleanup();
+  const now = Date.now();
+  const entry = store.get(key);
+
+  if (!entry || now > entry.resetAt) {
+    return { used: 0, max: config.maxRequests, resetAt: 0 };
+  }
+
+  return {
+    used: entry.count,
+    max: config.maxRequests,
+    resetAt: entry.resetAt,
+  };
+}
+
 export function getClientIP(req: Request): string {
   const forwarded = req.headers.get("x-forwarded-for");
   if (forwarded) return forwarded.split(",")[0].trim();
