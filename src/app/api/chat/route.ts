@@ -5,7 +5,8 @@ import { checkRateLimit, getClientIP, isAdmin } from "@/lib/rate-limit";
 export const maxDuration = 60;
 
 // Rate limit: 20 messages per hour for regular users
-const RATE_LIMIT = { maxRequests: 20, windowMs: 60 * 60 * 1000 };
+// 20 messages per day per IP
+const RATE_LIMIT = { maxRequests: 20, windowMs: 24 * 60 * 60 * 1000 };
 
 export async function POST(req: Request) {
   // Admin bypass

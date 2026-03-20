@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
 import { peekRateLimit, getClientIP, isAdmin } from "@/lib/rate-limit";
 
-const RATE_LIMIT = { maxRequests: 20, windowMs: 60 * 60 * 1000 };
+// 20 messages per day per IP
+const RATE_LIMIT = { maxRequests: 20, windowMs: 24 * 60 * 60 * 1000 };
 
 export async function GET(req: Request) {
   if (isAdmin(req)) {
