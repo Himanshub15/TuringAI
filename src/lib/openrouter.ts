@@ -12,6 +12,6 @@ export const openrouter = createOpenAICompatible({
 
 // Model routing — free models for different tasks
 export const MODELS = {
-  chat: "google/gemma-3n-e4b-it:free",
-  title: "google/gemma-3n-e4b-it:free",
+  chat: "google/gemma-3-27b-it:free",
+  title: "google/gemma-3-27b-it:free",
 } as const;
