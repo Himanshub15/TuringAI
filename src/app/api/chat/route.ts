@@ -8,6 +8,14 @@ export const maxDuration = 60;
 // 20 messages per day per IP
 const RATE_LIMIT = { maxRequests: 20, windowMs: 24 * 60 * 60 * 1000 };
 
+// Pick the model provider — OpenRouter if key exists, else NVIDIA NIM
+function getModel() {
+  if (process.env.OPENROUTER_API_KEY) {
+    return openrouter.chatModel(MODELS.chat);
+  }
+  return nim.chatModel("moonshotai/kimi-k2.5");
+}
+
 export async function POST(req: Request) {
   // Admin bypass
   if (!isAdmin(req)) {
@@ -47,27 +55,13 @@ export async function POST(req: Request) {
     ? `You are a helpful AI assistant. The user has enabled web search. Here are relevant search results to help answer their question:\n\n${searchResults}\n\nUse these search results to provide an informed, up-to-date answer. Cite sources when relevant.`
     : "You are a helpful AI assistant. Be concise, clear, and helpful.";
 
-  const convertedMessages = await convertToModelMessages(messages);
+  const result = streamText({
+    model: getModel(),
+    system: systemPrompt,
+    messages: await convertToModelMessages(messages),
+    maxOutputTokens: 4096,
+    temperature: 0.7,
+  });
 
-  // Try OpenRouter first, fall back to NVIDIA NIM
-  try {
-    const result = streamText({
-      model: openrouter.chatModel(MODELS.chat),
-      system: systemPrompt,
-      messages: convertedMessages,
-      maxOutputTokens: 4096,
-      temperature: 0.7,
-    });
-    return result.toTextStreamResponse();
-  } catch {
-    // Fallback to NVIDIA NIM
-    const result = streamText({
-      model: nim.chatModel("moonshotai/kimi-k2.5"),
-      system: systemPrompt,
-      messages: convertedMessages,
-      maxOutputTokens: 4096,
-      temperature: 0.7,
-    });
-    return result.toTextStreamResponse();
-  }
+  return result.toTextStreamResponse();
 }
