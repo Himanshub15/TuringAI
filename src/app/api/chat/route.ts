@@ -65,9 +65,9 @@ export async function POST(req: Request) {
     : "You are TuringAI, a helpful AI assistant. Be concise, clear, and helpful.";
 
   // Convert UIMessages to simple role/content and add system as first "user" turn
-  const simpleMessages: { role: "user" | "assistant" | "system"; content: string }[] = [];
+  const simpleMessages: { role: "user" | "assistant"; content: string }[] = [];
 
-  // Add system prompt as a model instruction turn
+  // Gemma doesn't support system messages — inject as user/assistant pair
   simpleMessages.push({ role: "user", content: systemPrompt });
   simpleMessages.push({ role: "assistant", content: "Understood. I'll follow these instructions." });
 
