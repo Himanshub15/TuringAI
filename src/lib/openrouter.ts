@@ -12,6 +12,6 @@ export const openrouter = createOpenAICompatible({
 
 // Model routing — free models for different tasks
 export const MODELS = {
-  chat: "minimax/minimax-m2.5:free",
-  title: "minimax/minimax-m2.5:free",
+  chat: "google/gemma-3n-e4b-it:free",
+  title: "google/gemma-3n-e4b-it:free",
 } as const;
