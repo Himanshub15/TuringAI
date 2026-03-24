@@ -1,4 +1,4 @@
-import { streamText, convertToModelMessages, type UIMessage } from "ai";
+import { streamText, type UIMessage } from "ai";
 import { openrouter, MODELS } from "@/lib/openrouter";
 import { nim } from "@/lib/nim";
 import { checkRateLimit, getClientIP, isAdmin } from "@/lib/rate-limit";
@@ -14,6 +14,15 @@ function getModel() {
     return openrouter.chatModel(MODELS.chat);
   }
   return nim.chatModel("moonshotai/kimi-k2.5");
+}
+
+function extractText(msg: UIMessage): string {
+  return (
+    msg.parts
+      ?.filter((p) => p.type === "text")
+      .map((p) => (p as { type: "text"; text: string }).text)
+      .join("") || ""
+  );
 }
 
 export async function POST(req: Request) {
@@ -55,10 +64,23 @@ export async function POST(req: Request) {
     ? `You are a helpful AI assistant. The user has enabled web search. Here are relevant search results to help answer their question:\n\n${searchResults}\n\nUse these search results to provide an informed, up-to-date answer. Cite sources when relevant.`
     : "You are a helpful AI assistant. Be concise, clear, and helpful.";
 
+  // Convert to simple role/content format
+  // Prepend system prompt into first user message (Gemma doesn't support system messages)
+  const simpleMessages = messages.map((m) => ({
+    role: m.role as "user" | "assistant",
+    content: extractText(m),
+  }));
+
+  if (simpleMessages.length > 0 && simpleMessages[0].role === "user") {
+    simpleMessages[0] = {
+      role: "user",
+      content: `[Instructions: ${systemPrompt}]\n\n${simpleMessages[0].content}`,
+    };
+  }
+
   const result = streamText({
     model: getModel(),
-    system: systemPrompt,
-    messages: await convertToModelMessages(messages),
+    messages: simpleMessages,
     maxOutputTokens: 4096,
     temperature: 0.7,
   });
