@@ -64,14 +64,19 @@ export async function POST(req: Request) {
     ? `You are TuringAI, a helpful AI assistant. The user has enabled web search. Here are relevant search results to help answer their question:\n\n${searchResults}\n\nUse these search results to provide an informed, up-to-date answer. Cite sources when relevant.`
     : "You are TuringAI, a helpful AI assistant. Be concise, clear, and helpful.";
 
-  // Convert UIMessages to simple role/content format
-  // Embed system prompt in first user message (Gemma doesn't support system messages)
-  const simpleMessages = messages.map((m, i) => ({
-    role: m.role as "user" | "assistant",
-    content: i === 0 && m.role === "user"
-      ? `[Instructions: ${systemPrompt}]\n\n${extractText(m)}`
-      : extractText(m),
-  }));
+  // Convert UIMessages to simple role/content and add system as first "user" turn
+  const simpleMessages: { role: "user" | "assistant" | "system"; content: string }[] = [];
+
+  // Add system prompt as a model instruction turn
+  simpleMessages.push({ role: "user", content: systemPrompt });
+  simpleMessages.push({ role: "assistant", content: "Understood. I'll follow these instructions." });
+
+  for (const m of messages) {
+    const text = extractText(m);
+    if (text) {
+      simpleMessages.push({ role: m.role as "user" | "assistant", content: text });
+    }
+  }
 
   const result = streamText({
     model: getModel(),
